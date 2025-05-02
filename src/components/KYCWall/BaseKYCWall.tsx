@@ -11,6 +11,7 @@ import Log from '@libs/Log';
 import Navigation from '@libs/Navigation/Navigation';
 import {hasExpensifyPaymentMethod} from '@libs/PaymentUtils';
 import {isExpenseReport as isExpenseReportReportUtils, isIOUReport} from '@libs/ReportUtils';
+import {isWalletActivated} from '@libs/Wallet';
 import {kycWallRef} from '@userActions/PaymentMethods';
 import {createWorkspaceFromIOUPayment} from '@userActions/Policy/Policy';
 import {setKYCWallSource} from '@userActions/Wallet';
@@ -177,7 +178,7 @@ function KYCWall({
             }
             if (!isExpenseReport) {
                 // Ask the user to upgrade to a gold wallet as this means they have not yet gone through our Know Your Customer (KYC) checks
-                const hasActivatedWallet = userWallet?.tierName && [CONST.WALLET.TIER_NAME.GOLD, CONST.WALLET.TIER_NAME.PLATINUM].some((name) => name === userWallet.tierName);
+                const hasActivatedWallet = isWalletActivated(userWallet?.tierName);
 
                 if (!hasActivatedWallet) {
                     Log.info('[KYC Wallet] User does not have active wallet');

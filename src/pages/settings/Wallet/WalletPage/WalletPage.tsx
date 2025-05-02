@@ -40,6 +40,7 @@ import Navigation from '@libs/Navigation/Navigation';
 import {formatPaymentMethods, getPaymentMethodDescription} from '@libs/PaymentUtils';
 import {getDescriptionForPolicyDomainCard} from '@libs/PolicyUtils';
 import {buildCannedSearchQuery} from '@libs/SearchQueryUtils';
+import {isWalletActivated} from '@libs/Wallet';
 import PaymentMethodList from '@pages/settings/Wallet/PaymentMethodList';
 import variables from '@styles/variables';
 import {deletePaymentBankAccount, openPersonalBankAccountSetupView, setPersonalBankAccountContinueKYCOnSuccess} from '@userActions/BankAccounts';
@@ -90,7 +91,7 @@ function WalletPage({shouldListenForResize = false}: WalletPageProps) {
     const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
 
     const hasWallet = !isEmpty(userWallet);
-    const hasActivatedWallet = ([CONST.WALLET.TIER_NAME.GOLD, CONST.WALLET.TIER_NAME.PLATINUM] as string[]).includes(userWallet?.tierName ?? '');
+    const hasActivatedWallet = isWalletActivated(userWallet?.tierName);
     const hasAssignedCard = !isEmpty(cardList);
 
     const isPendingOnfidoResult = userWallet?.isPendingOnfidoResult ?? false;

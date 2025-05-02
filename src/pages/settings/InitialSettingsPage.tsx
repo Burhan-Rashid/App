@@ -37,6 +37,7 @@ import {convertToDisplayString} from '@libs/CurrencyUtils';
 import Navigation from '@libs/Navigation/Navigation';
 import {getFreeTrialText, hasSubscriptionRedDotError} from '@libs/SubscriptionUtils';
 import {getProfilePageBrickRoadIndicator} from '@libs/UserUtils';
+import {isWalletActivated} from '@libs/Wallet';
 import {hasGlobalWorkspaceSettingsRBR} from '@libs/WorkspacesSettingsUtils';
 import type SETTINGS_TO_RHP from '@navigation/linkingConfig/RELATIONS/SETTINGS_TO_RHP';
 import {showContextMenu} from '@pages/home/report/ContextMenu/ReportActionContextMenu';
@@ -117,6 +118,7 @@ function InitialSettingsPage({currentUserPersonalDetails}: InitialSettingsPagePr
 
     const freeTrialText = getFreeTrialText(policies);
     const shouldOpenBookACall = tryNewDot?.classicRedirect?.dismissed === false;
+    const hasActivatedWallet = isWalletActivated(userWallet?.tierName);
 
     useEffect(() => {
         openInitialSettingsPage();
@@ -352,7 +354,7 @@ function InitialSettingsPage({currentUserPersonalDetails}: InitialSettingsPagePr
                                     item.action();
                                 })}
                                 iconStyles={item.iconStyles}
-                                badgeText={item.badgeText ?? getWalletBalance(isPaymentItem)}
+                                badgeText={item.badgeText ?? getWalletBalance(hasActivatedWallet && isPaymentItem)}
                                 badgeStyle={item.badgeStyle}
                                 fallbackIcon={item.fallbackIcon}
                                 brickRoadIndicator={item.brickRoadIndicator}
@@ -373,7 +375,7 @@ function InitialSettingsPage({currentUserPersonalDetails}: InitialSettingsPagePr
                 </View>
             );
         },
-        [styles.pb4, styles.mh3, styles.sectionTitle, styles.sectionMenuItem, translate, userWallet?.currentBalance, focusedRouteName, isExecuting, singleExecution],
+        [styles.pb4, styles.mh3, styles.sectionTitle, styles.sectionMenuItem, translate, userWallet?.currentBalance, focusedRouteName, isExecuting, singleExecution, hasActivatedWallet],
     );
 
     const accountMenuItems = useMemo(() => getMenuItemsSection(accountMenuItemsData), [accountMenuItemsData, getMenuItemsSection]);

@@ -1,3 +1,4 @@
+import CONST from '@src/CONST';
 import type {Card} from '@src/types/onyx';
 
 function checkIfWalletIsAvailable(): Promise<boolean> {
@@ -15,4 +16,8 @@ function isCardInWallet(_card: Card) {
     return Promise.resolve(true);
 }
 
-export {handleAddCardToWallet, isCardInWallet, checkIfWalletIsAvailable};
+function isWalletActivated(tierName: string | undefined): boolean {
+    return [CONST.WALLET.TIER_NAME.GOLD, CONST.WALLET.TIER_NAME.PLATINUM].some((name) => name === tierName);
+}
+
+export {handleAddCardToWallet, isCardInWallet, checkIfWalletIsAvailable, isWalletActivated};
