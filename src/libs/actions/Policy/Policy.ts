@@ -87,6 +87,7 @@ import ONYXKEYS from '@src/ONYXKEYS';
 import type {
     IntroSelected,
     InvitedEmailsToAccountIDs,
+    PersonalDetails,
     PersonalDetailsList,
     Policy,
     PolicyCategory,
@@ -1609,8 +1610,9 @@ function removeWorkspace(policyID: string) {
 /**
  * Generate a policy name based on an email and policy list.
  * @param [email] the email to base the workspace name on. If not passed, will use the logged-in user's email instead
+ * @param [currentUser] Optional, current user details
  */
-function generateDefaultWorkspaceName(email = ''): string {
+function generateDefaultWorkspaceName(email = '', currentUser?: PersonalDetails): string {
     const emailParts = email ? email.split('@') : sessionEmail.split('@');
     if (!emailParts || emailParts.length !== 2) {
         return '';
@@ -1618,7 +1620,7 @@ function generateDefaultWorkspaceName(email = ''): string {
     const username = emailParts.at(0) ?? '';
     const domain = emailParts.at(1) ?? '';
     const userDetails = PersonalDetailsUtils.getPersonalDetailByEmail(sessionEmail);
-    const displayName = userDetails?.displayName?.trim();
+    const displayName = currentUser?.displayName?.trim() ?? userDetails?.displayName?.trim();
     let displayNameForWorkspace = '';
 
     if (!PUBLIC_DOMAINS.some((publicDomain) => publicDomain === domain.toLowerCase())) {
@@ -1628,7 +1630,7 @@ function generateDefaultWorkspaceName(email = ''): string {
     } else if (PUBLIC_DOMAINS.some((publicDomain) => publicDomain === domain.toLowerCase())) {
         displayNameForWorkspace = Str.UCFirst(username);
     } else {
-        displayNameForWorkspace = userDetails?.phoneNumber ?? '';
+        displayNameForWorkspace = currentUser?.phoneNumber ?? userDetails?.phoneNumber ?? '';
     }
 
     if (`@${domain}` === CONST.SMS.DOMAIN) {

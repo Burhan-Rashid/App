@@ -8,6 +8,7 @@ import {generateDefaultWorkspaceName, generatePolicyID} from '@libs/actions/Poli
 import type {CustomRNImageManipulatorResult} from '@libs/cropOrRotateImage/types';
 import {addErrorMessage} from '@libs/ErrorUtils';
 import Navigation from '@libs/Navigation/Navigation';
+import * as PersonalDetailsUtils from '@libs/PersonalDetailsUtils';
 import {getDefaultWorkspaceAvatar} from '@libs/ReportUtils';
 import {isRequiredFulfilled} from '@libs/ValidationUtils';
 import CONST from '@src/CONST';
@@ -86,7 +87,8 @@ function WorkspaceConfirmationForm({onSubmit, policyOwnerEmail = '', onBackButto
 
     const [allPersonalDetails] = useOnyx(ONYXKEYS.PERSONAL_DETAILS_LIST, {canBeMissing: false});
 
-    const defaultWorkspaceName = generateDefaultWorkspaceName(policyOwnerEmail || session?.email);
+    const currentUserDetails = PersonalDetailsUtils.getPersonalDetailByEmail(session?.email ?? '');
+    const defaultWorkspaceName = generateDefaultWorkspaceName(policyOwnerEmail || session?.email, currentUserDetails);
     const [workspaceNameFirstCharacter, setWorkspaceNameFirstCharacter] = useState(defaultWorkspaceName ?? '');
 
     const userCurrency = allPersonalDetails?.[session?.accountID ?? CONST.DEFAULT_NUMBER_ID]?.localCurrencyCode ?? CONST.CURRENCY.USD;
