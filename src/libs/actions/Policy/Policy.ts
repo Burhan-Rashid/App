@@ -194,13 +194,17 @@ Onyx.connect({
 
 let sessionEmail = '';
 let sessionAccountID = 0;
-Onyx.connect({
-    key: ONYXKEYS.SESSION,
-    callback: (val) => {
-        sessionEmail = val?.email ?? '';
-        sessionAccountID = val?.accountID ?? CONST.DEFAULT_NUMBER_ID;
-    },
-});
+
+function initSessionOnyxDataForWorkspaceConfirmationPage() {
+    Onyx.connect({
+        key: ONYXKEYS.SESSION,
+        callback: (val) => {
+            sessionEmail = val?.email ?? '';
+            sessionAccountID = val?.accountID ?? CONST.DEFAULT_NUMBER_ID;
+        },
+    });
+}
+initSessionOnyxDataForWorkspaceConfirmationPage();
 
 let allPersonalDetails: OnyxEntry<PersonalDetailsList>;
 Onyx.connect({
@@ -5273,4 +5277,5 @@ export {
     updateLastAccessedWorkspaceSwitcher,
     setIsForcedToChangeCurrency,
     setIsComingFromGlobalReimbursementsFlow,
+    initSessionOnyxDataForWorkspaceConfirmationPage,
 };
