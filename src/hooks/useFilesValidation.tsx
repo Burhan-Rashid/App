@@ -101,7 +101,7 @@ function useFilesValidation(proceedWithFilesAction: (files: FileObject[], dataTr
         setIsErrorModalVisible(true);
     };
 
-    const isValidFile = (originalFile: FileObject, item: DataTransferItem | undefined, isCheckingMultipleFiles?: boolean) => {
+    const isValidFile = (originalFile: FileObject, item: DataTransferItem | undefined, isCheckingMultipleFiles?: boolean, isValidatingReceiptFiles?: boolean) => {
         if (item && item.kind === 'file' && 'webkitGetAsEntry' in item) {
             const entry = item.webkitGetAsEntry();
 
@@ -114,7 +114,7 @@ function useFilesValidation(proceedWithFilesAction: (files: FileObject[], dataTr
         return normalizeFileObject(originalFile)
             .then((normalizedFile) =>
                 validateImageForCorruption(normalizedFile).then(() => {
-                    const error = validateAttachment(normalizedFile, isCheckingMultipleFiles, isValidatingReceipts);
+                    const error = validateAttachment(normalizedFile, isCheckingMultipleFiles, isValidatingReceiptFiles ?? isValidatingReceipts);
                     if (error) {
                         const errorData = {
                             error,
@@ -175,7 +175,7 @@ function useFilesValidation(proceedWithFilesAction: (files: FileObject[], dataTr
         }
     }, [deduplicateErrors, pdfFilesToRender.length, proceedWithFilesAction, resetValidationState]);
 
-    const validateAndResizeFiles = (files: FileObject[], items: DataTransferItem[]) => {
+    const validateAndResizeFiles = (files: FileObject[], items: DataTransferItem[], isValidatingReceiptFiles?: boolean) => {
         // Early return for empty files
         if (files.length === 0) {
             return;
@@ -188,7 +188,7 @@ function useFilesValidation(proceedWithFilesAction: (files: FileObject[], dataTr
             originalFileOrder.current.set(file.uri ?? '', index);
         });
 
-        Promise.all(files.map((file, index) => isValidFile(file, items.at(index), files.length > 1).then((isValid) => (isValid ? file : null))))
+        Promise.all(files.map((file, index) => isValidFile(file, items.at(index), files.length > 1, isValidatingReceiptFiles).then((isValid) => (isValid ? file : null))))
             .then((validationResults) => {
                 const filteredResults = validationResults.filter((result): result is FileObject => result !== null);
                 const pdfsToLoad = filteredResults.filter((file) => Str.isPDF(file.name ?? ''));
@@ -265,7 +265,7 @@ function useFilesValidation(proceedWithFilesAction: (files: FileObject[], dataTr
             });
     };
 
-    const validateFiles = (files: FileObject[], items?: DataTransferItem[]) => {
+    const validateFiles = (files: FileObject[], items?: DataTransferItem[], isValidatingReceiptFiles?: boolean) => {
         if (files.length > 1) {
             setIsValidatingMultipleFiles(true);
         }
@@ -276,7 +276,7 @@ function useFilesValidation(proceedWithFilesAction: (files: FileObject[], dataTr
             }
             setErrorAndOpenModal(CONST.FILE_VALIDATION_ERRORS.MAX_FILE_LIMIT_EXCEEDED);
         } else {
-            validateAndResizeFiles(files, items ?? []);
+            validateAndResizeFiles(files, items ?? [], isValidatingReceiptFiles);
         }
     };
 

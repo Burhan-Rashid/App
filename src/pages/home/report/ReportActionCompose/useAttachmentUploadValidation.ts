@@ -183,11 +183,11 @@ function useAttachmentUploadValidation({
                 }
 
                 attachmentUploadType.current = 'receipt';
-                validateFiles([file], items);
+                validateFiles([file], items, true);
             }
 
             attachmentUploadType.current = 'receipt';
-            validateFiles(files, items);
+            validateFiles(files, items, true);
         },
         [policy, shouldAddOrReplaceReceipt, transactionID, validateFiles],
     );
