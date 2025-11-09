@@ -119,6 +119,7 @@ import {
     getChatByParticipants,
     getChildReportNotificationPreference,
     getDefaultNotificationPreferenceForReport,
+    getDependentFieldsToUpdate,
     getFieldViolation,
     getLastVisibleMessage,
     getNextApproverAccountID,
@@ -2464,6 +2465,8 @@ function updateReportField(
         isASAPSubmitBetaEnabled,
     });
 
+    const updatedDependentFields = getDependentFieldsToUpdate(reportField, report);
+
     const optimisticData: OnyxUpdate[] = [
         {
             onyxMethod: Onyx.METHOD.MERGE,
@@ -2471,9 +2474,11 @@ function updateReportField(
             value: {
                 fieldList: {
                     [fieldKey]: reportField,
+                    ...updatedDependentFields,
                 },
                 pendingFields: {
                     [fieldKey]: CONST.RED_BRICK_ROAD_PENDING_ACTION.UPDATE,
+                    ...Object.fromEntries(Object.keys(updatedDependentFields ?? {}).map((key) => [key, CONST.RED_BRICK_ROAD_PENDING_ACTION.UPDATE])),
                 },
             },
         },
@@ -2520,12 +2525,17 @@ function updateReportField(
             value: {
                 fieldList: {
                     [fieldKey]: previousReportField,
+                    ...Object.fromEntries(Object.keys(updatedDependentFields ?? {}).map((key) => [key, report.fieldList?.[key]])),
                 },
                 pendingFields: {
                     [fieldKey]: null,
+                    ...Object.fromEntries(Object.keys(updatedDependentFields ?? {}).map((key) => [key, null])),
                 },
                 errorFields: {
                     [fieldKey]: getMicroSecondOnyxErrorWithTranslationKey('report.genericUpdateReportFieldFailureMessage'),
+                    ...Object.fromEntries(
+                        Object.keys(updatedDependentFields ?? {}).map((key) => [key, getMicroSecondOnyxErrorWithTranslationKey('report.genericUpdateReportFieldFailureMessage')]),
+                    ),
                 },
             },
         },
@@ -2557,9 +2567,11 @@ function updateReportField(
             value: {
                 pendingFields: {
                     [fieldKey]: null,
+                    ...Object.fromEntries(Object.keys(updatedDependentFields ?? {}).map((key) => [key, null])),
                 },
                 errorFields: {
                     [fieldKey]: null,
+                    ...Object.fromEntries(Object.keys(updatedDependentFields ?? {}).map((key) => [key, null])),
                 },
             },
         },

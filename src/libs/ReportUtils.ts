@@ -4179,6 +4179,32 @@ function getReportFieldKey(reportFieldId: string | undefined) {
     return `expensify_${reportFieldId}`;
 }
 
+function getDependentFieldsToUpdate(reportField: PolicyReportField, report: Report | undefined) {
+    if (!report?.fieldList) {
+        return {};
+    }
+
+    const updatedFields: Record<string, Partial<PolicyReportField>> = {};
+
+    Object.entries(report.fieldList).forEach(([fieldKey, field]) => {
+        // Skip the field itself
+        if (field.name === reportField.name) {
+            return;
+        }
+
+        // Check if it's a formula type and references the current field name
+        const expectedDefault = `{field:${reportField.name}}`;
+        if (field.type === 'formula' && field.defaultValue === expectedDefault) {
+            updatedFields[fieldKey] = {
+                ...field,
+                value: reportField.value, // update the value
+            };
+        }
+    });
+
+    return updatedFields;
+}
+
 /**
  * Get the report fields attached to the policy given policyID
  */
@@ -12579,6 +12605,7 @@ export {
     getReportActionActorAccountID,
     getReportDescription,
     getReportFieldKey,
+    getDependentFieldsToUpdate,
     getReportIDFromLink,
     getSearchReportName,
     getReportTransactions,
