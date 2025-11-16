@@ -72,6 +72,7 @@ import {
     sendMoneyWithWallet,
     setMoneyRequestBillable,
     setMoneyRequestCategory,
+    setMoneyRequestParticipantsFromReport,
     setMoneyRequestReceipt,
     setMoneyRequestReimbursable,
     splitBill,
@@ -88,7 +89,7 @@ import CONST from '@src/CONST';
 import ONYXKEYS from '@src/ONYXKEYS';
 import ROUTES from '@src/ROUTES';
 import type SCREENS from '@src/SCREENS';
-import type {RecentlyUsedCategories, Report} from '@src/types/onyx';
+import type {PersonalDetails, RecentlyUsedCategories, Report} from '@src/types/onyx';
 import type {Participant} from '@src/types/onyx/IOU';
 import type {PaymentMethodType} from '@src/types/onyx/OriginalMessage';
 import type {InvoiceReceiver} from '@src/types/onyx/Report';
@@ -273,6 +274,16 @@ function IOURequestStepConfirmation({
     const isASAPSubmitBetaEnabled = isBetaEnabled(CONST.BETAS.ASAP_SUBMIT);
 
     useFetchRoute(transaction, transaction?.comment?.waypoints, action, shouldUseTransactionDraft(action) ? CONST.TRANSACTION.STATE.DRAFT : CONST.TRANSACTION.STATE.CURRENT);
+
+    useEffect(() => {
+        if (!optimisticTransaction?.transactionID) {
+            return;
+        }
+        const hasOptimisticParticipants = optimisticTransaction.participants?.some((participant) => participant.accountID && participant?.isOptimisticPersonalDetail);
+        if (hasOptimisticParticipants) {
+            setMoneyRequestParticipantsFromReport(optimisticTransaction?.transactionID, report, undefined, personalDetails);
+        }
+    }, [personalDetails, optimisticTransaction, report]);
 
     useEffect(() => {
         Performance.markEnd(CONST.TIMING.OPEN_CREATE_EXPENSE_APPROVE);

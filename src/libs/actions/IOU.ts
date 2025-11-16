@@ -11739,7 +11739,7 @@ function replaceReceipt({transactionID, file, source, transactionPolicyCategorie
  * @param transactionID of the transaction to set the participants of
  * @param report attached to the transaction
  */
-function getMoneyRequestParticipantsFromReport(report: OnyxEntry<OnyxTypes.Report>): Participant[] {
+function getMoneyRequestParticipantsFromReport(report: OnyxEntry<OnyxTypes.Report>, allPersonalDetails?: OnyxTypes.PersonalDetailsList | undefined): Participant[] {
     // If the report is iou or expense report, we should get the chat report to set participant for request money
     const chatReport = isMoneyRequestReportReportUtils(report) ? getReportOrDraftReport(report?.chatReportID) : report;
     const currentUserAccountID = deprecatedCurrentUserPersonalDetails?.accountID;
@@ -11761,7 +11761,15 @@ function getMoneyRequestParticipantsFromReport(report: OnyxEntry<OnyxTypes.Repor
         const chatReportOtherParticipants = Object.keys(chatReport?.participants ?? {})
             .map(Number)
             .filter((accountID) => accountID !== currentUserAccountID);
-        participants = chatReportOtherParticipants.map((accountID) => ({accountID, selected: true}));
+        participants = chatReportOtherParticipants.map((accountID) => ({
+            accountID,
+            selected: true,
+            ...(allPersonalDetails?.[accountID]
+                ? {
+                      isOptimisticPersonalDetail: allPersonalDetails[accountID].isOptimisticPersonalDetail ?? false,
+                  }
+                : {}),
+        }));
     }
 
     return participants;
@@ -11773,8 +11781,13 @@ function getMoneyRequestParticipantsFromReport(report: OnyxEntry<OnyxTypes.Repor
  * @param report attached to the transaction
  * @param participantsAutoAssigned whether participants were auto assigned
  */
-function setMoneyRequestParticipantsFromReport(transactionID: string, report: OnyxEntry<OnyxTypes.Report>, participantsAutoAssigned = true) {
-    const participants = getMoneyRequestParticipantsFromReport(report);
+function setMoneyRequestParticipantsFromReport(
+    transactionID: string,
+    report: OnyxEntry<OnyxTypes.Report>,
+    participantsAutoAssigned = true,
+    allPersonalDetails?: OnyxTypes.PersonalDetailsList,
+) {
+    const participants = getMoneyRequestParticipantsFromReport(report, allPersonalDetails);
     return Onyx.merge(`${ONYXKEYS.COLLECTION.TRANSACTION_DRAFT}${transactionID}`, {
         participants,
         participantsAutoAssigned,
